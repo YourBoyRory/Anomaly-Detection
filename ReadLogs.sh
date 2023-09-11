@@ -47,27 +47,41 @@ monitorSSH () {
     result=$(journalctl -u sshd -S "1 second ago" --no-pager)
     if [ "$result" != "-- No entries --" ]; then
         echo "$result"
-        selection=$(notify-send -A "View Captured Log" "Warning SSH Event Just happened!" "$result")
+        selection=$(notify-send -A "View Captured Log" "[Warning] SSH Event Just happened!" "$result")
         if [ "$selection" == "0" ] ; then
              drawWindow "Captured SSH Event" "$result"
         fi
     fi
 }
 
-# Root Usage Monitor
-monitorRoot () {
-    result=$(journalctl -g root -S "1 second ago" --no-pager)
+# monitor FireWall Events
+monitorUFW () {
+    result=$(journalctl -g "ufw" -S "1 second ago" --no-pager)
     if [ "$result" != "-- No entries --" ]; then
         echo "$result"
-        selection=$(notify-send -A "View Captured Log" "Warning Root Event Just happened!" "$result")
+        selection=$(notify-send -A "View Captured Log" "[Warning] Firewall Event Just happened!" "$result")
         if [ "$selection" == "0" ] ; then
-             drawWindow "Captured Root Event" "$result"
+             drawWindow "Captured SSH Event" "$result"
+        fi
+    fi
+}
+
+# Sudo Usage Monitor
+monitorSudo () {
+    result=$(journalctl -g "for user root" -S "1 second ago" --no-pager)
+    if [ "$result" != "-- No entries --" ]; then
+        fullResults=$(journalctl -g "root" -S "1 second ago" --no-pager)
+        echo "$fullResults"
+        selection=$(notify-send -A "View Captured Log" "[Warning] Root Event Just happened!" "$fullResults")
+        if [ "$selection" == "0" ] ; then
+             drawWindow "Captured Root Event" "$fullResults"
         fi
     fi
 }
 
 while true; do
     monitorSSH & # monitor SSH Login
-    monitorRoot & # Root Usage Monitor
+    monitorUFW & # monitor FireWall Events
+    monitorSudo & # Sudo Usage Monitor
     sleep 1
 done 
