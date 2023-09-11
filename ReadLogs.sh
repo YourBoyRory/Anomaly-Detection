@@ -61,7 +61,7 @@ monitorUFW () {
         echo "$result"
         selection=$(notify-send -A "View Captured Log" "[Warning] Firewall Event Just happened!" "$result")
         if [ "$selection" == "0" ] ; then
-             drawWindow "Captured SSH Event" "$result"
+             drawWindow "Captured Firewall Event" "$result"
         fi
     fi
 }
