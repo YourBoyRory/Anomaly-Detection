@@ -14,13 +14,13 @@ drawWindow () {
     echo \
     "<!DOCTYPE html>
     <html>
-      <head>
-        <title>Title of the document</title>
-      </head>
-      <body style=\"background-color:#1C1C1C;\">
-        <font color=\"#E0E1DE\">
-        <p>$logText</p>
-      </body>
+        <head>
+            <title>$1</title>
+        </head>
+        <body style=\"background-color:#1C1C1C;\">
+            <font color=\"#E0E1DE\">
+            <p>$logText</p>
+        </body>
     </html>" \
     >> /tmp/$tempName
     
