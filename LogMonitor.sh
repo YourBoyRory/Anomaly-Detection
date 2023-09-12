@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Shows log window
 drawWindow () {
     #Var
     Xaxis=$(xrandr --current | grep '*' | uniq | awk '{print $1}' | cut -d 'x' -f1) # finds screen width
@@ -40,56 +41,57 @@ drawWindow () {
         --uri="file:///tmp/$tempName"
     
     rm /tmp/$tempName # Remove tmp File
-}
+} # end drawWindow()
 
+# Send Email
 sendEmail () {
-    emailList=zaynebyard@gmail.com;yourboyrory@gmail.com
-    echo "$2" | mailx -s "$1" $emailList
-}
+    emailList=zaynebyard@gmail.com;yourboyrory@gmail.com  # email list
+    echo "$2" | mailx -s "$1" $emailList                  # sends the captured log as an email with the event type as the subject  
+} # end sendEmail()
 
 # monitor SSH Login
 monitorSSH () {
-    result=$(journalctl -u sshd -S "1 second ago" --no-pager)
+    result=$(journalctl -u sshd -S "1 second ago" --no-pager)           # detects all SHH events
     if [ "$result" != "-- No entries --" ]; then
-        echo "$result"
-        sendEmail "Captured SSH Event" "$result"
-        selection=$(notify-send -A "View Captured Log" "[Warning] SSH Event Just happened!" "$result")
+        echo "$result"                                                  # Displays the captured log on the console  
+        sendEmail "Captured SSH Event" "$result"                        # Send the admins an email
+        selection=$(notify-send -A "View Captured Log" "[Warning] SSH Event Just happened!" "$result")  # Show the currently logged on user (if was installed on a workstation) that an event has occurred
         if [ "$selection" == "0" ] ; then
-             drawWindow "Captured SSH Event" "$result"
+             drawWindow "Captured SSH Event" "$result"                  # opened the window to view the log if the user clicks the notification
         fi
     fi
-}
+} # end monitorSSH()
 
 # monitor FireWall Events
 monitorUFW () {
-    result=$(journalctl -g "ufw" -S "1 second ago" --no-pager)
+    result=$(journalctl -g "ufw" -S "1 second ago" --no-pager)           # detects all Firewall events
     if [ "$result" != "-- No entries --" ]; then
-        echo "$result"
-        sendEmail "Captured Firewall Event" "$result"
-        selection=$(notify-send -A "View Captured Log" "[Warning] Firewall Event Just happened!" "$result")
+        echo "$result"                                                   # Displays the captured log on the console  
+        sendEmail "Captured Firewall Event" "$result"                    # Send the admins an email
+        selection=$(notify-send -A "View Captured Log" "[Warning] Firewall Event Just happened!" "$result") # Show the currently logged on user (if was installed on a workstation) that an event has occurred
         if [ "$selection" == "0" ] ; then
-             drawWindow "Captured Firewall Event" "$result"
+             drawWindow "Captured Firewall Event" "$result"              # opened the window to view the log if the user clicks the notification
         fi
     fi
-}
+} # end monitorUFW()
 
 # Sudo Usage Monitor
 monitorSudo () {
-    result=$(journalctl -g "for user root" -S "1 second ago" --no-pager)
+    result=$(journalctl -g "for user root" -S "1 second ago" --no-pager) # detects root login or log out (or sudo usage)
     if [ "$result" != "-- No entries --" ]; then
-        fullResults=$(journalctl -g "root" -S "1 second ago" --no-pager)
-        echo "$fullResults"
-        sendEmail "Captured Root Event" "$result"
-        selection=$(notify-send -A "View Captured Log" "[Warning] Root Event Just happened!" "$fullResults")
+        fullResults=$(journalctl -g "root" -S "1 second ago" --no-pager) # pulls full log of for root login, not just "session opened for user root"
+        echo "$fullResults"                                              # Displays the captured log on the console
+        sendEmail "Captured Root Event" "$result"                        # Send the admins an email
+        selection=$(notify-send -A "View Captured Log" "[Warning] Root Event Just happened!" "$fullResults") # Show the currently logged on user (if was installed on a workstation) that an event has occurred
         if [ "$selection" == "0" ] ; then
-             drawWindow "Captured Root Event" "$fullResults"
+             drawWindow "Captured Root Event" "$fullResults"             # opened the window to view the log if the user clicks the notification
         fi
     fi
-}
+} # end monitorSudo()
 
-while true; do
-    monitorSSH & # monitor SSH Login
-    monitorUFW & # monitor FireWall Events
-    monitorSudo & # Sudo Usage Monitor
+while true; do      # never ends works in the background
+    monitorSSH &    # monitor SSH Login
+    monitorUFW &    # monitor Firewall Events
+    monitorSudo &   # Sudo Usage Monitor
     sleep 1
 done 
