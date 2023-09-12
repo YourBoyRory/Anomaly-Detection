@@ -79,7 +79,7 @@ monitorUFW () {
 monitorSudo () {
     result=$(journalctl -g "for user root" -S "1 second ago" --no-pager) # detects root login or log out (or sudo usage)
     if [ "$result" != "-- No entries --" ]; then
-        fullResults=$(journalctl -g "root" -S "1 second ago" --no-pager) # pulls full log of for root login, not just "session opened for user root"
+        fullResults=$(journalctl -g "root" -S "1 second ago" --no-pager) # pulls full log of for root login, not just "session opened for user root" (Shows what command run with sudo)
         echo "$fullResults"                                              # Displays the captured log on the console
         sendEmail "Captured Root Event" "$result"                        # Send the admins an email
         selection=$(notify-send -A "View Captured Log" "[Warning] Root Event Just happened!" "$fullResults") # Show the currently logged on user (if was installed on a workstation) that an event has occurred
