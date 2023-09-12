@@ -2,7 +2,7 @@
 
 fileName=$(hostname)_logs_$(date +"%Y-%m-%d_%T")          # File name will be "hostname_logs_date_time.csv" 
 
-echo "Delimiter is ';'"                                   # Hard Coded Delimiter
+echo "Delimiter is ';'"                                   # Notifies about Hard Coded Delimiter
 
 echo "Extracting 7 Days of logs"
 journalctl -S "7 days ago" --no-pager > ./$fileName.csv   # Pulls 7 days of logs
