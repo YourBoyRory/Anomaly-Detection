@@ -42,6 +42,11 @@ drawWindow () {
     rm /tmp/$tempName # Remove tmp File
 }
 
+sendEmail () {
+    emailList=zaynebyard@gmail.com;yourboyrory@gmail.com
+    echo "$2" | mailx -s "$1" $emailList
+}
+
 # monitor SSH Login
 monitorSSH () {
     result=$(journalctl -u sshd -S "1 second ago" --no-pager)
@@ -50,6 +55,7 @@ monitorSSH () {
         selection=$(notify-send -A "View Captured Log" "[Warning] SSH Event Just happened!" "$result")
         if [ "$selection" == "0" ] ; then
              drawWindow "Captured SSH Event" "$result"
+             sendEmail "Captured SSH Event" "$result"
         fi
     fi
 }
@@ -62,6 +68,7 @@ monitorUFW () {
         selection=$(notify-send -A "View Captured Log" "[Warning] Firewall Event Just happened!" "$result")
         if [ "$selection" == "0" ] ; then
              drawWindow "Captured Firewall Event" "$result"
+             sendEmail "Captured Firewall Event" "$result"
         fi
     fi
 }
@@ -75,6 +82,7 @@ monitorSudo () {
         selection=$(notify-send -A "View Captured Log" "[Warning] Root Event Just happened!" "$fullResults")
         if [ "$selection" == "0" ] ; then
              drawWindow "Captured Root Event" "$fullResults"
+             sendEmail "Captured Root Event" "$result"
         fi
     fi
 }
