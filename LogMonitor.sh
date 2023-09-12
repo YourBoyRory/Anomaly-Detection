@@ -52,10 +52,10 @@ monitorSSH () {
     result=$(journalctl -u sshd -S "1 second ago" --no-pager)
     if [ "$result" != "-- No entries --" ]; then
         echo "$result"
+        sendEmail "Captured SSH Event" "$result"
         selection=$(notify-send -A "View Captured Log" "[Warning] SSH Event Just happened!" "$result")
         if [ "$selection" == "0" ] ; then
              drawWindow "Captured SSH Event" "$result"
-             sendEmail "Captured SSH Event" "$result"
         fi
     fi
 }
@@ -65,10 +65,10 @@ monitorUFW () {
     result=$(journalctl -g "ufw" -S "1 second ago" --no-pager)
     if [ "$result" != "-- No entries --" ]; then
         echo "$result"
+        sendEmail "Captured Firewall Event" "$result"
         selection=$(notify-send -A "View Captured Log" "[Warning] Firewall Event Just happened!" "$result")
         if [ "$selection" == "0" ] ; then
              drawWindow "Captured Firewall Event" "$result"
-             sendEmail "Captured Firewall Event" "$result"
         fi
     fi
 }
@@ -79,10 +79,10 @@ monitorSudo () {
     if [ "$result" != "-- No entries --" ]; then
         fullResults=$(journalctl -g "root" -S "1 second ago" --no-pager)
         echo "$fullResults"
+        sendEmail "Captured Root Event" "$result"
         selection=$(notify-send -A "View Captured Log" "[Warning] Root Event Just happened!" "$fullResults")
         if [ "$selection" == "0" ] ; then
              drawWindow "Captured Root Event" "$fullResults"
-             sendEmail "Captured Root Event" "$result"
         fi
     fi
 }
