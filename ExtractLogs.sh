@@ -1,7 +1,7 @@
 #!/bin/bash
 
 fileName=$(hostname)_logs_$(date +"%Y-%m-%d_%T")          # File name will be "hostname_logs_date_time.csv" 
-extractDayCount=1                                         # the amount of days to extract from the system log
+extractDayCount=7                                         # the amount of days to extract from the system log
 
 echo "Delimiter is ';'"                                   # Notifies about Hard Coded Delimiter
 
