@@ -91,12 +91,9 @@ monitorSudo () {
     fi
 } # end monitorSudo()
 
-timeSize=1
-startDate=$(date --date='2 seconds ago' +"%s")
 while true; do      # never ends works in the background
-    startDate=$((startDate+$timeSize))
-    monitorSSH $startDate    # monitor SSH Login
-    monitorUFW $startDate    # monitor Firewall Events
-    monitorSudo $startDate   # Sudo Usage Monitor
-    sleep $timeSize
+    monitorSSH &    # monitor SSH Login
+    monitorUFW &    # monitor Firewall Events
+    monitorSudo &   # Sudo Usage Monitor
+    sleep 1
 done 
