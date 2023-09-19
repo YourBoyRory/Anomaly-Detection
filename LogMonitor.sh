@@ -95,5 +95,5 @@ while true; do      # never ends works in the background
     monitorSSH &    # monitor SSH Login
     monitorUFW &    # monitor Firewall Events
     monitorSudo &   # Sudo Usage Monitor
-    sleep 1
+    sleep 1 
 done 
