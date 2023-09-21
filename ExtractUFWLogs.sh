@@ -12,26 +12,31 @@ formatCSV () {
     sed -i 's/;/:/3g' $1                                            # Plucks out any remaining delimiters and replaces them with a ':'
     echo "Formatting UFW Data"
     sed -i 's/ /;/7g' $1                                           # puts data in its own columns
+    echo "Pruning Irrelevant Information"
+    perl -ni -e 'print unless /^-- No entries -;$/;' $1 
 } # end formatCSV()
 
 echo "Delimiter is ';'"                                   # Notifies about Hard Coded Delimiter
 
 extractLogs () {
     i=0
+    output="something"
     exitCode=1
     # find the first boot that happend on that day
-    while [[ $i -gt -29 ]] && [[ $exitCode -ne 0 ]] ; do
+    while [ "$output" != "" ] && [[ $exitCode -ne 0 ]] ; do
         i=$(($i-1))
-        output="$(journalctl -k -b $i -o short --no-pager | grep "$(date --date="$1 days ago" "+%b %d")")"
+        output=$(journalctl -k -b $i -o short --no-pager)
+        echo $output | grep "$(date --date="$1 days ago" "+%b %d")" >> /dev/null
         exitCode=$?
     done
     # find the last boot that happend on that day
-    while [[ $i -gt -29 ]] && [[ $exitCode -ne 1 ]] ; do
+    while [ "$output" != "" ] && [[ $exitCode -ne 1 ]] ; do
         i=$(($i-1))
-        output=$(journalctl -k -b $i -o short --no-pager | grep "$(date --date="$1 days ago" "+%b %d")")
+        output=$(journalctl -k -b $i -o short --no-pager)
+        echo $output | grep "$(date --date="$1 days ago" "+%b %d")" >> /dev/null
         exitCode=$?
     done
-    echo "Date;Kernel Time;Event Type;In NIC; Out NIC;Offending NIC MAC;Source;Destination" > $2
+    echo "-- No entries --" > $2
     while [[ $i -ne 1 ]] ; do
         journalctl -k -b $i -o short-precise -g "ufw" --no-pager >> $2
         i=$(($i+1))
