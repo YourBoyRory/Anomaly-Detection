@@ -16,39 +16,36 @@ formatCSV () {
     perl -ni -e 'print unless /^-- No entries -;$/;' $1 
 } # end formatCSV()
 
-echo "Delimiter is ';'"                                   # Notifies about Hard Coded Delimiter
-
 extractLogs () {
     i=0
     output="something"
     exitCode=1
-    # find the first boot that happend on that day
+    # find the first boot that happened on that day
+    # keeps looping back until it runs out of logs or it finds a log from the desired date
     while [ "$output" != "" ] && [[ $exitCode -ne 0 ]] ; do
         i=$(($i-1))
         output=$(journalctl -k -b $i -o short --no-pager)
         echo $output | grep "$(date --date="$1 days ago" "+%b %d")" >> /dev/null
         exitCode=$?
     done
-    # find the last boot that happend on that day
+    # find the last boot that happened on that day
+    # continues looping back until it fails to find a log from the desired date or we run out of logs
     while [ "$output" != "" ] && [[ $exitCode -ne 1 ]] ; do
         i=$(($i-1))
         output=$(journalctl -k -b $i -o short --no-pager)
         echo $output | grep "$(date --date="$1 days ago" "+%b %d")" >> /dev/null
         exitCode=$?
     done
-    echo "-- No entries --" > $2
+    # Loops back through boot logs I found above to store them in a file
+    echo "-- No entries --" > $2 # used to clear/make the file and to make sure its not empty for formatting, this line gets removed from the file
     while [[ $i -ne 1 ]] ; do
         journalctl -k -b $i -o short-precise -g "ufw" --no-pager >> $2
         i=$(($i+1))
     done
-    
-}
+} # end extrctLogs()
 
-#journalctl -k -b -13 -o short-precise --no-pager | grep "$(date --date="7 days ago" "+%b %d")"
-
-
+echo "Delimiter is ';'" 
 echo "Extracting $extractDayCount Days of logs"
-#journalctl -k -g "ufw" -S "$extractDayCount days ago" --no-pager > ./$fileName.csv   # detects all Firewall events
-extractLogs $extractDayCount ./$fileName.csv
+extractLogs $extractDayCount ./$fileName.csv            
 formatCSV ./$fileName.csv
 echo "File saved as $fileName.csv"
