@@ -38,9 +38,8 @@ extractLogs () {
     done
     # Loops back through boot logs I found above to store them in a file
     echo "-- No entries --" > $2 # used to clear/make the file and to make sure its not empty for formatting, this line gets removed from the file
-    while [[ $i -ne 1 ]] ; do
+    for i in {1..6} ; do
         journalctl -k -b $i -o short-precise -g "ufw" --no-pager >> $2
-        i=$(($i+1))
     done
 } # end extrctLogs()
 
