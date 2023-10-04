@@ -2,10 +2,10 @@ import pandas as pd
 
 def clean_data(csv_file_path):
     # Load CSV data into a DataFrame, skipping the first row (header)
-    df = pd.read_csv(csv_file_path, delimiter=',', encoding='utf-8', skiprows=[0], error_bad_lines=False, low_memory=False)
+    df = pd.read_csv(csv_file_path, delimiter=';', encoding='utf-8', skiprows=[0], error_bad_lines=False, low_memory=False)
 
     # Rename the columns based on the provided header
-    column_names = ['TimeCreated', 'Kernel', 'Type', 'NIC IN', 'NIC OUT', 'MAC', 'SRC', 'DST', 'LEN', 'TOS', 'PREC', 'TTL', 'ID']
+    column_names = ['TimeCreated', 'Kernel', 'Message']
     df.columns = column_names
 
     # Perform data cleaning and preprocessing as needed
