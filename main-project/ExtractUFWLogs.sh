@@ -21,33 +21,40 @@ formatCSV () {
 } # end formatCSV()
 
 extractLogs () {
+    echo -n "["
     i=0
     output="something"
     exitCode=1
     # find the first boot that happened on that day
     # keeps looping back until it runs out of logs or it finds a log from the desired date
     while [ "$output" != "" ] && [[ $exitCode -ne 0 ]] ; do
+        echo -n "#"
         i=$(($i-1))
         output=$(journalctl -k -b $i -o short-full --no-pager)
-        echo $output | grep "$(date --date="$1 days ago" "+%Y-%m-%d")" # >> /dev/null
+        echo $output | grep "$(date --date="$1 days ago" "+%Y-%m-%d")" >> /dev/null
         exitCode=$?
-        echo $exitCode
+        echo -n "#"
     done
     # find the last boot that happened on that day
     # continues looping back until it fails to find a log from the desired date or we run out of logs
     while [ "$output" != "" ] && [[ $exitCode -ne 1 ]] ; do
+        echo -n "#"
         i=$(($i-1))
         output=$(journalctl -k -b $i -o short-full --no-pager)
-        echo $output | grep "$(date --date="$1 days ago" "+%b %d")" # >> /dev/null
+        echo $output | grep "$(date --date="$1 days ago" "+%b %d")" >> /dev/null
         exitCode=$?
-        echo $exitCode
+        echo -n "#"
     done
     # Loops back through boot logs I found above to store them in a file
     echo "OwO" > $2 # used to clear/make the file and to make sure its not empty for formatting, this line gets removed from the file
     while [[ i -le 0 ]] ; do
+        echo -n "#"
         journalctl -k -b $i -o short-full -g "ufw" --no-pager >> $2
         i=$(($i+1))
+        echo -n "#"
     done
+    echo -n "]"
+    echo
 } # end extrctLogs()
 
 echo "Delimiter is ','" 
