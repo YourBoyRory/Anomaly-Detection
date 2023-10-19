@@ -46,9 +46,9 @@ dispTraceIP() {
     org=$(cat $storeAddr | grep -w "$1" | awk -F  '","' '{print $3}')
     even=$(cat $storeAddr | grep -w "$1" | awk -F  '","' '{print $2}')
     if [[ "$country" == "LOCAL" ]] ;then
-        echo -e "\e[1A\e[K\033[0m$1:\033[1m $even $org - $city, $state, $country\033[0m"
+        echo -e "\e[1A\e[K\033[0m$1:\033[1m $even $org\033[0m"
     elif [[ "$country" == "UNKNOWN" ]] ; then
-        echo -e "\e[1A\e[K\033[0;31m$1:\033[1;31m $even $org - $city, $state, $country\033[0m"
+        echo -e "\e[1A\e[K\033[0;31m$1:\033[1;31m $even $org\033[0m"
     else
         echo -e "\e[1A\e[K\033[0;33m$1:\033[1;33m $even $org - $city, $state, $country\033[0m"
     fi 
