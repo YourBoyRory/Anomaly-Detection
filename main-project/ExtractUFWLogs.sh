@@ -22,7 +22,7 @@ formatCSV () {
 
 extractLogs () {
     echo -n "["
-    i=0
+    i=1
     output="something"
     exitCode=1
     # find the first boot that happened on that day
@@ -47,7 +47,7 @@ extractLogs () {
     done
     # Loops back through boot logs I found above to store them in a file
     echo "OwO" > $2 # used to clear/make the file and to make sure its not empty for formatting, this line gets removed from the file
-    while [[ i -le 0 ]] ; do
+    while [[ i -le 1 ]] ; do
         echo -n "#"
         journalctl -k -b $i -o short-full -g "ufw" --no-pager >> $2
         i=$(($i+1))
