@@ -1,12 +1,24 @@
 #!/bin/bash
 storeFile="./ipAddrLoc.csv"
 storeAddr="./ipAddr.csv"
-
+sedTmp="/tmp/sed.tmp"
 whoisTmp="/tmp/whois.tmp"
 
+filterIP() {
+    isLocal=1
+    if ( echo "$1" | grep "$(echo $2 | awk -F '.' '{print $1"."$2"."}')" >> /dev/null ) ;then 
+        isLocal=0
+    elif [[ "$1" == "127.0.0.1" ]] ; then
+        isLocal=0
+    elif [[ "$2" == "224.0.0.1" ]] ; then
+        isLocal=0
+    elif [[ "$1" == "0.0.0.0" || "$1" ==  "0000:0000:0000:0000:0000:0000:0000:0000" ]] ; then
+        isLocal=0
+    fi
+}
+
 traceIP() {
-    echo "$1" | grep "192.168.1" >> /dev/null
-    isLocal=$?
+    filterIP "$1" "$2"
     if [[ $isLocal -eq 0 ]] ;then
         echo -e "LOCAL" 
     else
@@ -21,8 +33,7 @@ traceIP() {
 }
 
 storeIP() {
-    echo "$1" | grep "192.168.1" >> /dev/null
-    isLocal=$?
+    filterIP "$1" "$2"
     if [[ $isLocal -eq 0 ]] ;then
         echo -e "\"$1\",\"1\",\"LOCAL\",\"LOCAL\",\"LOCAL\",\"LOCAL\"" >> $storeAddr
     else
@@ -63,22 +74,25 @@ getIP() {
     i=2
     while [[ $i -ne $lineCount ]] ; do
         currIP=$(echo $(head -n$i $1 | tail -n1) | grep -oP 'SRC=\K.*' | cut -d, -f1)
+        currDST=$(echo $(head -n$i $1 | tail -n1) | grep -oP 'DST=\K.*' | cut -d, -f1)
         newIP=$(cat $storeAddr | grep -w "$currIP")
         if [[ "$newIP" == "" ]] ; then
-            currLoc=$(traceIP "$currIP")
-            storeIP "$currIP"
+            currLoc=$(traceIP "$currIP" "$currDST")
+            storeIP "$currIP" "$currDST"
         else
             currLoc=$(cat $storeAddr | grep -w "$currIP" | awk -F  '","' '{print $6}' | rev | cut -c 2- | rev)
             addrNum=$(cat $storeAddr | grep -w "$currIP" | awk -F  '","' '{print $2}')
             findString="\"$currIP\",\"$addrNum\","
             replaceString="\"$currIP\",\"$(($addrNum+1))\","
-            sed -i "s/$findString/$replaceString/g" "$storeAddr"
+            sed "s/$findString/$replaceString/g" "$storeAddr" > $sedTmp
+            cat $sedTmp > $storeAddr
         fi
         locNum=$(cat $storeFile | grep -w "$currLoc" | awk -F  ',' '{print $2}')
         if [[ $locNum != "" ]] ; then 
             findString="$currLoc,$locNum"
             replaceString="$currLoc,$(($locNum+1))"
-            sed -i "s/$findString/$replaceString/g" "$storeFile"
+            sed "s/$findString/$replaceString/g" "$storeFile" > $sedTmp
+            cat $sedTmp > $storeFile
         else
             echo "$currLoc,1" >> $storeFile
         fi
@@ -88,4 +102,4 @@ getIP() {
     echo -e "\e[1A\e[KDone!"
 }
 
-getIP "./Events.csv" 
+getIP "./Events*.csv" 

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#fileName=$(hostname)_ufwlogs_$(date +"%Y-%m-%d_%T")          # File name will be "hostname_ufwlogs_date_time.csv" 
-fileName=Events.csv
-extractDayCount=7                                           # the amount of days to extract from the system log
+fileName="$(hostname)_ufwlogs_$(date +"%Y-%m-%d_%T").csv"          # File name will be "hostname_ufwlogs_date_time.csv" 
+#fileName=Events.csv
+extractDayCount=1                                           # the amount of days to extract from the system log
 
 formatCSV () {
     echo "Separating Dates from data into 1st column"
