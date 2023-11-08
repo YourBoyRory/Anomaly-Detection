@@ -1,24 +1,48 @@
 #!/bin/bash
 
-fileName="$(hostname)_ufwlogs_$(date +"%Y-%m-%d_%T").csv"          # File name will be "hostname_ufwlogs_date_time.csv" 
-#fileName=Events.csv
-extractDayCount=1                                           # the amount of days to extract from the system log
+#fileName="$(hostname)_ufwlogs_$(date +"%Y-%m-%d_%T").csv"          # File name will be "hostname_ufwlogs_date_time.csv" 
+fileName=Events.csv
+tempFile=Events.tmp
+extractDayCount=7                                           # the amount of days to extract from the system log
 
 formatCSV () {
     echo "Separating Dates from data into 1st column"
     perl -i -pe 's/^(.{27}).{1}/\1,/g' $1                           # Separates date
-    echo "Separating Dates app and machine names into 2nd column"
+    echo "Separating app and machine names into 2nd column"
     perl -i -pe 's/([^:]*:[^:]*:[^:]*):/\1,/g' $1                   # Separates apps and machine name
+    echo "Separating event type into 3nd column"
+    sed -i 's/]/],/' $1
     echo "Pruning rouge delimiters"
-    sed -i 's/,/:/3g' $1                                            # Plucks out any remaining delimiters and replaces them with a ':'
-    echo "Formatting UFW Data"
-    sed -i 's/ /,/7g' $1                                           # puts data in its own columns
-    echo "Setting column titles"
-    perl -i -pe 'if ($. == 1) { print "Time Created, Kernel, Event Type, In, Out, Mac, Source, Destination\n"; $_ = <> }' $1
+    sed -i 's/,/:/4g' $1                                            # Plucks out any remaining delimiters and replaces them with a ':'
     echo "Pruning Irrelevant Information"
     perl -ni -e 'print unless /^-- No entries --$/;' $1
-    sed -i 's/\(\([^,]*,\)\{7\}[^,]*\).*/\1/' $1
+    echo "Setting column titles"
+    echo "Time Created, Kernel, Event Type, In, Out, Mac, Source, Destination, Length, TOS, PREC, TTL, ID, Source Port, Destination Port " > $2
+    echo "Formatting UFW Data"
+    makeCSV $1 $2
 } # end formatCSV()
+
+makeCSV () {
+    lineCount=$(wc -l $1 | awk '{print $1}')
+    i=1
+    while [[ $i -ne $lineCount ]] ; do
+        HEAD=$(echo $(head -n3 $1 | tail -n1) | awk -F  ',' '{print $1"\",\""$2"\",\""$3}')
+        IN=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'IN=.*' | cut -d' ' -f1)
+        OUT=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'OUT=.*' | cut -d' ' -f1)
+        MAC=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'MAC=.*' | cut -d' ' -f1)
+        SRC=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'SRC=.*' | cut -d' ' -f1)
+        DST=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'DST=.*' | cut -d' ' -f1)
+        LEN=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'LEN=.*' | cut -d' ' -f1)
+        TOS=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'TOS=.*' | cut -d' ' -f1)
+        PREC=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'PREC=.*' | cut -d' ' -f1)
+        TTL=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'TTL=.*' | cut -d' ' -f1)
+        ID=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'ID=.*' | cut -d' ' -f1)
+        SPT=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'SPT=.*' | cut -d' ' -f1)
+        DPT=$(echo $(head -n3 $1 | tail -n1) | grep -oP 'DPT=.*' | cut -d' ' -f1)
+        echo $(echo "\"$HEAD\",\"$IN\",\"$OUT\",\"$MAC\",\"$SRC\",\"$DST\",\"$LEN\",\"$TOS\",\"$PREC\",\"$TTL\",\"$ID\",\"$SPT\",\"$DPT\"") >> $2
+        i=$(($i+1))
+    done
+}
 
 extractLogs () {
     echo -n "["
@@ -59,6 +83,6 @@ extractLogs () {
 
 echo "Delimiter is ','" 
 echo "Extracting $extractDayCount Days of logs"
-extractLogs $extractDayCount ./$fileName            
-formatCSV ./$fileName
+extractLogs $extractDayCount ./$tempFile
+formatCSV ./$tempFile ./$fileName
 echo "File saved as $fileName"

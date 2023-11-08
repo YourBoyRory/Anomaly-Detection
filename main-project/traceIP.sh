@@ -102,4 +102,4 @@ getIP() {
     echo -e "\e[1A\e[KDone!"
 }
 
-getIP "./Events*.csv" 
+getIP "./Events.csv" 
