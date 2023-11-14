@@ -65,7 +65,7 @@ monitorSSH () {
     result=$(journalctl -u sshd -S "1 second ago" --no-pager)  # detects all SHH events
     if [ "$result" != "-- No entries --" ]; then
         echo "$result"                                         # Displays the captured log on the console  
-        sendEmail "Captured SSH Event" "$result"               # Send the admins an email
+        #sendEmail "Captured SSH Event" "$result"               # Send the admins an email
         sendDENotify "SSH Event" "$result" &                   # Send the notification on a new thread to the user (if this script was run on a workstation)
     fi
 } # end monitorSSH()
@@ -75,7 +75,7 @@ monitorUFW () {
     result=$(journalctl -g "ufw" -S "1 second ago" --no-pager)  # detects all Firewall events
     if [ "$result" != "-- No entries --" ]; then
         echo "$result"                                          # Displays the captured log on the console  
-        sendEmail "Captured Firewall Event" "$result"           # Send the admins an email
+        #sendEmail "Captured Firewall Event" "$result"           # Send the admins an email
         sendDENotify "Firewall Event" "$result" &               # Send the notification on a new thread to the user (if this script was run on a workstation)
     fi
 } # end monitorUFW()
@@ -86,7 +86,7 @@ monitorSudo () {
     if [ "$result" != "-- No entries --" ]; then
         fullResults=$(journalctl -g "root" -S "1 second ago" --no-pager) # pulls full log of for root login, not just "session opened for user root" (Shows what command run with sudo)
         echo "$fullResults"                                              # Displays the captured log on the console
-        sendEmail "Captured Root Event" "$result"                        # Send the admins an email
+        #sendEmail "Captured Root Event" "$result"                        # Send the admins an email
         sendDENotify "Root Event" "$result" &                            # Send the notification on a new thread to the user (if this script was run on a workstation)
     fi
 } # end monitorSudo()
